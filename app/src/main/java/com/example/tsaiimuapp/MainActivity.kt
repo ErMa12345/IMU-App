@@ -111,7 +111,7 @@ class MainActivity : ComponentActivity() {
                 roll.value = (roll.value.drop(1) + curRoll) as ArrayList<Float>
 
                 //update every 100 ms (about how long it takes between updates in the csv)
-                Thread.sleep(1)
+                Thread.sleep(100)
 
             }
             //simulates no readings
