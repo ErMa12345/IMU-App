@@ -1,15 +1,18 @@
 package com.example.tsaiimuapp
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,17 +36,17 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
-var launched = 0
 @SuppressLint("RememberReturnType")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(readCSV: suspend () -> Unit) {
     val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(pageCount = {HomeTabs.entries.size})
+    val pagerState = rememberPagerState(pageCount = { HomeTabs.entries.size })
     val selectedTabIndex = remember {
         derivedStateOf { pagerState.currentPage }
     }
@@ -54,60 +57,176 @@ fun MainScreen(readCSV: suspend () -> Unit) {
     LaunchedEffect(Unit) {
         readCSV()
     }
-    Scaffold (
-        topBar = { TopAppBar(title = { Text(text = "IMU App")})}
-    ) {
-        Column (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = it.calculateTopPadding())
-        ) {
-            TabRow(
-                selectedTabIndex = selectedTabIndex.value,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HomeTabs.entries.forEachIndexed {index, currentTab ->
-                    Tab(
-                        selected = selectedTabIndex.value == index,
-                        onClick = {
-                            scope.launch {
-                                pagerState.animateScrollToPage(currentTab.ordinal)
-                                curScreen.value = currentTab.ordinal
-                            }
-                        },
-                        text = {
-                            Text(text = currentTab.text)
 
+    // Determine the current orientation
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    Scaffold(
+        topBar = { TopAppBar(title = { Text(text = "IMU App") }) }
+    ) {
+        if (isLandscape) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = it.calculateTopPadding())
+            ) {
+                TabRow(
+                    selectedTabIndex = selectedTabIndex.value,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    HomeTabs.entries.forEachIndexed { index, currentTab ->
+                        Tab(
+                            selected = selectedTabIndex.value == index,
+                            onClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(currentTab.ordinal)
+                                    curScreen.value = currentTab.ordinal
+                                }
+                            },
+                            text = {
+                                Text(text = currentTab.text)
+                            }
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(50.dp))
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .weight(3f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (curScreen.value == 0) {
+                            graphArrays(time = time, lineOne = yaw, lineTwo = pitch, lineThree = roll)
+                        } else {
+                            graphArrays(time = time, lineOne = accelX, lineTwo = accelY, lineThree = accelZ)
                         }
-                    )
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(50.dp))
-            HorizontalPager(
-                state = pagerState,
+        } else {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
+                    .fillMaxSize()
+                    .padding(top = it.calculateTopPadding())
             ) {
-                Box (
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .fillMaxSize()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
+                TabRow(
+                    selectedTabIndex = selectedTabIndex.value,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    //Text(text = "works")
-                    if (curScreen.value == 0) {
-                        graphArrays(time = time, lineOne = yaw, lineTwo = pitch, lineThree = roll)
-                    } else {
-                        graphArrays(time = time, lineOne = accelX, lineTwo = accelY, lineThree = accelZ)
+                    HomeTabs.entries.forEachIndexed { index, currentTab ->
+                        Tab(
+                            selected = selectedTabIndex.value == index,
+                            onClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(currentTab.ordinal)
+                                    curScreen.value = currentTab.ordinal
+                                }
+                            },
+                            text = {
+                                Text(text = currentTab.text)
+                            }
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(50.dp))
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (curScreen.value == 0) {
+                            graphArrays(time = time, lineOne = yaw, lineTwo = pitch, lineThree = roll)
+                        } else {
+                            graphArrays(time = time, lineOne = accelX, lineTwo = accelY, lineThree = accelZ)
+                        }
                     }
                 }
             }
         }
     }
-
 }
+
+//fun MainScreen(readCSV: suspend () -> Unit) {
+//    val scope = rememberCoroutineScope()
+//    val pagerState = rememberPagerState(pageCount = {HomeTabs.entries.size})
+//    val selectedTabIndex = remember {
+//        derivedStateOf { pagerState.currentPage }
+//    }
+//
+//    val curScreen = remember {
+//        mutableStateOf(pagerState.currentPage)
+//    }
+//    LaunchedEffect(Unit) {
+//        readCSV()
+//    }
+//    Scaffold (
+//        topBar = { TopAppBar(title = { Text(text = "IMU App")})}
+//    ) {
+//        Column (
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(top = it.calculateTopPadding())
+//        ) {
+//            TabRow(
+//                selectedTabIndex = selectedTabIndex.value,
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                HomeTabs.entries.forEachIndexed {index, currentTab ->
+//                    Tab(
+//                        selected = selectedTabIndex.value == index,
+//                        onClick = {
+//                            scope.launch {
+//                                pagerState.animateScrollToPage(currentTab.ordinal)
+//                                curScreen.value = currentTab.ordinal
+//                            }
+//                        },
+//                        text = {
+//                            Text(text = currentTab.text)
+//
+//                        }
+//                    )
+//                }
+//            }
+//            Spacer(modifier = Modifier.height(50.dp))
+//            HorizontalPager(
+//                state = pagerState,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .weight(1f)
+//            ) {
+//                Box (
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .fillMaxSize()
+//                        .weight(1f),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    //Text(text = "works")
+//                    if (curScreen.value == 0) {
+//                        graphArrays(time = time, lineOne = yaw, lineTwo = pitch, lineThree = roll)
+//                    } else {
+//                        graphArrays(time = time, lineOne = accelX, lineTwo = accelY, lineThree = accelZ)
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//}
 @Composable
 fun graphArrays (time: MutableState<ArrayList<BigDecimal>>, lineOne: MutableState<ArrayList<Float>>, lineTwo: MutableState<ArrayList<Float>>, lineThree: MutableState<ArrayList<Float>>) {
     Canvas(modifier = Modifier.fillMaxSize()) {
