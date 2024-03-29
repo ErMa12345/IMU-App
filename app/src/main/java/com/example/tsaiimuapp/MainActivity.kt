@@ -83,6 +83,9 @@ class MainActivity : ComponentActivity() {
             while (line != null) {
                 //get current line values
                 line = reader.readLine()
+                if (line == null) {
+                    break
+                }
                 var current : List<String> = line.split(',')
                 var curTime = BigDecimal(current[1]) - BigDecimal(1666302376558)
                 var curAccelX = current[2].toFloat()
@@ -108,7 +111,7 @@ class MainActivity : ComponentActivity() {
                 roll.value = (roll.value.drop(1) + curRoll) as ArrayList<Float>
 
                 //update every 100 ms (about how long it takes between updates in the csv)
-                Thread.sleep(100)
+                Thread.sleep(1)
 
             }
             //simulates no readings
