@@ -80,8 +80,6 @@ class MainActivity : ComponentActivity() {
 
             var line = reader.readLine()
 
-            var counter = 0
-
             while (line != null) {
                 //get current line values
                 line = reader.readLine()
@@ -95,27 +93,6 @@ class MainActivity : ComponentActivity() {
                 var curRoll = current[14].toFloat()
 
                 //update the global lists
-//                time.removeFirst()
-//                time.addLast(curTime)
-//
-//                accelX.removeFirst()
-//                accelX.addLast(curAccelX)
-//
-//                accelY.removeFirst()
-//                accelY.addLast(curAccelY)
-//
-//                accelZ.removeFirst()
-//                accelZ.addLast(curAccelZ)
-//
-//                yaw.removeFirst()
-//                yaw.addLast(curYaw)
-//
-//                pitch.removeFirst()
-//                pitch.addLast(curPitch)
-//
-//                roll.removeFirst()
-//                roll.addLast(curRoll)
-
                 time.value = (time.value.drop(1) + curTime) as ArrayList<BigDecimal>
 
                 accelX.value = (accelX.value.drop(1) + curAccelX) as ArrayList<Float>
@@ -130,14 +107,28 @@ class MainActivity : ComponentActivity() {
 
                 roll.value = (roll.value.drop(1) + curRoll) as ArrayList<Float>
 
-                //Print data every 100 updates, for debugging, delete later
-                counter++
-
-
                 //update every 100 ms (about how long it takes between updates in the csv)
                 Thread.sleep(100)
 
-        }
+            }
+            //simulates no readings
+            while (true) {
+                time.value = (time.value.drop(1) + BigDecimal(0)) as ArrayList<BigDecimal>
+
+                accelX.value = (accelX.value.drop(1) + 0f) as ArrayList<Float>
+
+                accelY.value = (accelY.value.drop(1) + 0f) as ArrayList<Float>
+
+                accelZ.value = (accelZ.value.drop(1) + 0f) as ArrayList<Float>
+
+                yaw.value = (yaw.value.drop(1) + 0f) as ArrayList<Float>
+
+                pitch.value = (pitch.value.drop(1) + 0f) as ArrayList<Float>
+
+                roll.value = (roll.value.drop(1) + 0f) as ArrayList<Float>
+
+                Thread.sleep(100)
+            }
 
 
         }

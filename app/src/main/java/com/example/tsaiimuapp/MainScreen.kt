@@ -5,8 +5,10 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -29,6 +31,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
@@ -77,6 +82,7 @@ fun MainScreen(readCSV: suspend () -> Unit) {
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(50.dp))
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
@@ -84,7 +90,10 @@ fun MainScreen(readCSV: suspend () -> Unit) {
                     .weight(1f)
             ) {
                 Box (
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .fillMaxSize()
+                        .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     //Text(text = "works")
@@ -161,6 +170,18 @@ fun graphArrays (time: MutableState<ArrayList<BigDecimal>>, lineOne: MutableStat
             color = Color.Green,
             style = Stroke(width = 4f)
         )
+
+        val yAxisLabels = listOf(minValue, maxValue).map { value ->
+            val yPosition = size.height - scaleValue(value.toFloat())
+            val xPosition = 0f
+            drawIntoCanvas { canvas ->
+                val paint = android.graphics.Paint().apply {
+                    color = android.graphics.Color.BLACK
+                    textSize = 100f
+                }
+                canvas.nativeCanvas.drawText(value.toString(), xPosition, yPosition, paint)
+            }
+        }
 
 
     }
